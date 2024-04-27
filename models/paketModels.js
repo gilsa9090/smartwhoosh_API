@@ -1,51 +1,43 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
-const User = sequelize.define(
-  "User",
+const Paket = sequelize.define(
+  "Paket",
   {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
-    email: {
+    nama_paket: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    password: {
+    harga_paket: {
       type: DataTypes.STRING,
       allowNull: false,
-    },
-    role_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    nama: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    alamat: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
-    affiliate: {
-      type: DataTypes.STRING,
     },
     image: {
       type: DataTypes.STRING,
     },
+    deskripsi: {
+      type: DataTypes.TEXT,
+    },
+    kd_paket: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
   },
   {
-    tableName: "users",
+    tableName: "paket",
     indexes: [
       {
         unique: true,
-        fields: ["nama"],
+        fields: ["kd_paket"], // Menambahkan indeks pada kolom kd_paket
       },
     ],
   }
 );
 
-module.exports = User;
+module.exports = Paket;

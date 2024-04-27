@@ -2,6 +2,8 @@ const express = require("express");
 const sequelize = require("./config/database");
 const path = require("path");
 const authRoute = require("./routes/authRoute");
+const paketRoute = require("./routes/paketRoute");
+const transaksiRoute = require("./routes/transaksiRoute");
 const app = express();
 
 app.use(express.json());
@@ -20,6 +22,8 @@ sequelize
   });
 
 app.use("/api", authRoute);
+app.use("/api", paketRoute);
+app.use("/api", transaksiRoute);
 
 const PORT = process.env.PORT || 3000;
 
