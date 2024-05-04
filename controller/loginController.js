@@ -72,7 +72,14 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "Invalid Password" });
     }
 
-    const token = generateToken(user);
+    const UserData = {
+      userId: user.id,
+      email: user.email,
+      role_id: user.role_id,
+    };
+
+    const token = generateToken(UserData);
+
     res.status(200).json({ message: `Selamat Datang ${email}`, token });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
@@ -81,9 +88,17 @@ exports.login = async (req, res) => {
 
 exports.logout = async (req, res) => {
   try {
-    localStorage.removeItem("token");
-    res.status(200).json({ message: "Logout berhasil" });
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ message: "Token is required" });
+    }
+
+    res.removeHeader("Authorization");
+
+    res.status(200).json({ message: "Logout Successful" });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error during logout:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
