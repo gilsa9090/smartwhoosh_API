@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: May 04, 2024 at 05:21 AM
+-- Generation Time: May 04, 2024 at 11:54 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -43,7 +43,7 @@ CREATE TABLE `paket` (
 --
 
 INSERT INTO `paket` (`id`, `nama_paket`, `harga_paket`, `image`, `deskripsi`, `kd_paket`, `createdAt`, `updatedAt`) VALUES
-(1, 'Express One', '10000', '1714799979692-laundry.jpg', 'Laundry cepat dengan hargat mantap', 'EXONE', '2024-05-04 05:19:39', '2024-05-04 05:19:39');
+(2, 'Express OneX', '10000', '1714820784924-laundry.jpg', 'Laundry cepat dengan hargat mantap', 'EXONE', '2024-05-04 11:06:24', '2024-05-04 11:06:24');
 
 -- --------------------------------------------------------
 
@@ -55,15 +55,22 @@ CREATE TABLE `transaksi` (
   `id` int NOT NULL,
   `nama_pelanggan` varchar(255) NOT NULL,
   `berat` int NOT NULL,
-  `tanggal_masuk` datetime NOT NULL,
-  `tanggal_keluar` datetime NOT NULL,
+  `tanggal_masuk` date NOT NULL,
+  `tanggal_keluar` date NOT NULL,
   `total_harga` int NOT NULL,
   `status` int NOT NULL,
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
-  `nama_kasir` varchar(255) DEFAULT NULL,
+  `kasir_id` int DEFAULT NULL,
   `nama_paket` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `transaksi`
+--
+
+INSERT INTO `transaksi` (`id`, `nama_pelanggan`, `berat`, `tanggal_masuk`, `tanggal_keluar`, `total_harga`, `status`, `createdAt`, `updatedAt`, `kasir_id`, `nama_paket`) VALUES
+(1, 'Bima Sakti', 2, '2024-05-06', '2024-05-08', 200000, 1, '2024-05-04 11:30:19', '2024-05-04 11:50:08', 2, 'EXONE');
 
 -- --------------------------------------------------------
 
@@ -108,7 +115,7 @@ ALTER TABLE `paket`
 --
 ALTER TABLE `transaksi`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `nama_kasir` (`nama_kasir`),
+  ADD KEY `kasir_id` (`kasir_id`),
   ADD KEY `nama_paket` (`nama_paket`);
 
 --
@@ -116,7 +123,8 @@ ALTER TABLE `transaksi`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `users_nama` (`nama`);
+  ADD UNIQUE KEY `users_nama` (`nama`),
+  ADD UNIQUE KEY `users_id` (`id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -126,13 +134,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `paket`
 --
 ALTER TABLE `paket`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `transaksi`
 --
 ALTER TABLE `transaksi`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -148,7 +156,7 @@ ALTER TABLE `users`
 -- Constraints for table `transaksi`
 --
 ALTER TABLE `transaksi`
-  ADD CONSTRAINT `transaksi_ibfk_1` FOREIGN KEY (`nama_kasir`) REFERENCES `users` (`nama`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `transaksi_ibfk_1` FOREIGN KEY (`kasir_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `transaksi_ibfk_2` FOREIGN KEY (`nama_paket`) REFERENCES `paket` (`kd_paket`) ON DELETE SET NULL ON UPDATE CASCADE;
 COMMIT;
 

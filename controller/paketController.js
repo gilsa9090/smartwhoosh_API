@@ -1,5 +1,6 @@
 const Paket = require("../models/paketModels");
 const path = require("path");
+const fs = require("fs");
 
 exports.getAllPaket = async (req, res) => {
   try {
@@ -34,5 +35,83 @@ exports.createPaket = async (req, res) => {
       .json({ message: "New Paket Successfully Created", data: newPaket });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.getPaketById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const paketId = await Paket.findByPk(id);
+
+    if (!paketId) {
+      return res.status(404).json({ error: "Paket Tidak ditemukan" });
+    }
+
+    const imageUrl = `http://localhost:3000/${paketId.image}`;
+
+    res.json({ paketId, imageUrl });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.updatePaket = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nama_paket, harga_paket, deskripsi, kd_paket } = req.body;
+    let image = "";
+
+    if (req.file) {
+      image = req.file.filename;
+    }
+
+    const paket = await Paket.findByPk(id);
+
+    if (!paket) {
+      return res.status(404).json({ error: "Paket tidak ada" });
+    }
+
+    if (image && paket.image) {
+      const imagePath = path.join(__dirname, "../uploads/", paket.image);
+      fs.unlinkSync(imagePath);
+    }
+
+    if (!image && paket.image) {
+      image = paket.image;
+    }
+
+    await paket.update({
+      nama_paket,
+      harga_paket,
+      deskripsi,
+      kd_paket,
+      image,
+    });
+
+    res.json({ message: "paket berhasil diperbarui", data: paket });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.deletePaket = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const paket = await Paket.findByPk(id);
+
+    if (!paket) {
+      return res.status(404).json({ error: "Paket tidak ditemukan" });
+    }
+
+    if (paket.image) {
+      const imagePath = path.join(__dirname, "../uploads/", paket.image);
+      fs.unlinkSync(imagePath);
+    }
+
+    await paket.destroy();
+
+    res.json({ message: "paket berhasil dihapus" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };

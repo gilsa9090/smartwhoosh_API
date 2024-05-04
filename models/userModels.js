@@ -42,7 +42,7 @@ const User = sequelize.define(
     indexes: [
       {
         unique: true,
-        fields: ["nama"],
+        fields: ["id"],
       },
     ],
   }

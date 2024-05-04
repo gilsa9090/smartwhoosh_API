@@ -20,11 +20,11 @@ const Transaksi = sequelize.define(
       allowNull: false,
     },
     tanggal_masuk: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
     tanggal_keluar: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
     total_harga: {
@@ -42,9 +42,9 @@ const Transaksi = sequelize.define(
 );
 
 Transaksi.belongsTo(User, {
-  foreignKey: "nama_kasir",
+  foreignKey: "kasir_id",
   as: "kasir",
-  targetKey: "nama",
+  targetKey: "id",
 });
 
 Transaksi.belongsTo(Paket, {
