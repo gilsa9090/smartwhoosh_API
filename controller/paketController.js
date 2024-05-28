@@ -5,7 +5,26 @@ const fs = require("fs");
 exports.getAllPaket = async (req, res) => {
   try {
     const paket = await Paket.findAll();
-    res.json(paket);
+    const formatedPaket = paket.map((pk) => ({
+      id: pk.id,
+      nama_paket: pk.nama_paket,
+      harga_paket: pk.harga_paket,
+      image: `http://192.168.1.4:8000/${pk.image}`,
+      deskripsi: pk.deskripsi,
+      kd_paket: pk.kd_paket,
+      createdAt: pk.createdAt,
+      updateAt: pk.updatedAt,
+    }));
+    res.json(formatedPaket);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getTotalPaketCount = async (req, res) => {
+  try {
+    const totalPaket = await Paket.count();
+    res.json({ totalPaket });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

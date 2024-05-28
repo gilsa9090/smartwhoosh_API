@@ -1,13 +1,32 @@
 const express = require("express");
 const router = express.Router();
 const upload = require("../config/multerConfig");
-const authController = require("../controller/loginController");
-const verifyToken = require("../config/verifyToken");
+const UserController = require("../controller/loginController");
+const authenticateToken = require("../config/verifyToken");
 
-router.get("/user", authController.getAllUsers);
-router.get("/user/:id", verifyToken, authController.getUserById);
-router.post("/register", upload.single("image"), authController.register);
-router.post("/login", authController.login);
-router.post("/logout", authController.logout);
+// Route to get all users
+router.get("/users", UserController.getAllUsers);
+
+router.get("/users/total", UserController.getTotalUsers);
+
+// Route to get user by ID
+router.get("/users/:id", UserController.getUserById);
+
+// Route to register a new user
+router.post("/register", UserController.register);
+
+// Route to login
+router.post("/login", UserController.login);
+
+// Route untuk memperbarui informasi pengguna
+router.put(
+  "/users/:id",
+  authenticateToken,
+  upload.single("image"),
+  UserController.updateUser
+);
+
+// Route to logout (assuming you have a middleware to handle authentication)
+router.post("/logout", UserController.logout);
 
 module.exports = router;

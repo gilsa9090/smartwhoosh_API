@@ -15,6 +15,10 @@ const Transaksi = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    kd_transaksi: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     berat: {
       type: DataTypes.INTEGER,
       allowNull: false,
