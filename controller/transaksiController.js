@@ -1,6 +1,6 @@
+const Transaksi = require("../models/transaksiModel");
 const Paket = require("../models/paketModels");
 const User = require("../models/userModels");
-const Transaksi = require("../models/transaksiModel");
 
 exports.getAllTransaksi = async (req, res) => {
   try {
@@ -11,8 +11,33 @@ exports.getAllTransaksi = async (req, res) => {
   }
 };
 
+exports.getCountTransaksi = async (req, res) => {
+  try {
+    const countTransaksi = await Transaksi.count();
+    res.json({ countTransaksi });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 exports.createTransaksi = async (req, res) => {
   try {
+    const lastTransaksi = await Transaksi.findOne({
+      order: [["createdAt", "DESC"]],
+    });
+
+    let kd_transaksi;
+    if (lastTransaksi) {
+      const lastKode = lastTransaksi.kd_transaksi;
+      const lastNumber = parseInt(lastKode.slice(3)); // Ambil angka setelah "LOU"
+      const nextNumber = lastNumber + 1;
+      kd_transaksi = `LOU${nextNumber.toString().padStart(3, "0")}`;
+    } else {
+      // Jika tidak ada data transaksi, mulai dengan LOU001
+      kd_transaksi = "LOU001";
+    }
+
+    // Create new transaction with generated code
     const {
       nama_pelanggan,
       berat,
@@ -24,10 +49,6 @@ exports.createTransaksi = async (req, res) => {
       nama_paket,
     } = req.body;
 
-    if (!nama_pelanggan && !berat) {
-      return res.status(400).json({ error: "Nama and Berat is required" });
-    }
-
     const newTransaksi = await Transaksi.create({
       nama_pelanggan,
       berat,
@@ -37,13 +58,15 @@ exports.createTransaksi = async (req, res) => {
       status,
       kasir_id,
       nama_paket,
+      kd_transaksi: kd_transaksi, // Assign the generated transaction code
     });
 
     res
       .status(201)
       .json({ message: "Transaksi berhasil dibuat", data: newTransaksi });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error creating transaction:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -76,40 +99,29 @@ exports.getTransaksiById = async (req, res) => {
   }
 };
 
-exports.updateTransaksi = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const {
-      nama_pelanggan,
-      berat,
-      tanggal_masuk,
-      tanggal_keluar,
-      total_harga,
-      status,
-      kasir_id,
-      nama_paket,
-    } = req.body;
+exports.updateTransaksiStatus = async (req, res) => {
+  const { id } = req.params; // Ambil id transaksi dari URL params
+  const { status } = req.body; // Ambil status baru dari body request
 
+  try {
+    // Cari transaksi berdasarkan id
     const transaksi = await Transaksi.findByPk(id);
 
     if (!transaksi) {
-      return res.status(404).json({ error: "Transaksi tidak ada " });
+      return res.status(404).json({ error: "Transaksi not found" });
     }
 
-    await transaksi.update({
-      nama_pelanggan,
-      berat,
-      tanggal_masuk,
-      tanggal_keluar,
-      total_harga,
-      status,
-      kasir_id,
-      nama_paket,
-    });
+    // Lakukan update pada status transaksi
+    transaksi.status = status;
+    await transaksi.save();
 
-    res.json({ message: "Transaksi berhasil diupdate", data: transaksi });
+    res.json({
+      message: "Transaksi status updated successfully",
+      data: transaksi,
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error updating transaction status:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 

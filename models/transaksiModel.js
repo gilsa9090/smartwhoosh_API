@@ -18,6 +18,7 @@ const Transaksi = sequelize.define(
     kd_transaksi: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true, // Ensure kd_transaksi is unique
     },
     berat: {
       type: DataTypes.INTEGER,
@@ -41,13 +42,25 @@ const Transaksi = sequelize.define(
     },
   },
   {
-    tableName: "transaksi",
+    tableName: "transaksi", // Specify the table name explicitly
+    indexes: [
+      // Consider adding indexes for frequently used columns
+      {
+        unique: false, // Set to true if you want a unique index
+        fields: ["kasir_id"], // Example: Index on kasir_id
+      },
+      {
+        unique: false,
+        fields: ["nama_paket"], // Example: Index on nama_paket
+      },
+    ],
   }
 );
 
+// Define associations
 Transaksi.belongsTo(User, {
-  foreignKey: "kasir_id",
-  as: "kasir",
+  foreignKey: "kasir_id", // Foreign key in Transaksi model
+  as: "kasir", // Alias for the association
   targetKey: "id",
 });
 
