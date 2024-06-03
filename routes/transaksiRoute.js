@@ -5,6 +5,7 @@ const transaksiController = require("../controller/transaksiController");
 
 router.get("/transaksi", transaksiController.getAllTransaksi);
 router.get("/transaksi/total", transaksiController.getCountTransaksi);
+router.get("/transaksi/harga", transaksiController.getTotalHargaSemuaTransaksi);
 router.post("/transaksi", transaksiController.createTransaksi);
 router.get("/transaksi/:id", transaksiController.getTransaksiById);
 router.put("/transaksi/:id", transaksiController.updateTransaksiStatus);

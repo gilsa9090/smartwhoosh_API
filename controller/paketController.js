@@ -66,7 +66,7 @@ exports.getPaketById = async (req, res) => {
       return res.status(404).json({ error: "Paket Tidak ditemukan" });
     }
 
-    const imageUrl = `http://localhost:3000/${paketId.image}`;
+    const imageUrl = `http://192.168.1.4:3000/${paketId.image}`;
 
     res.json({ paketId, imageUrl });
   } catch (error) {

@@ -1,11 +1,27 @@
 const Transaksi = require("../models/transaksiModel");
 const Paket = require("../models/paketModels");
 const User = require("../models/userModels");
+const { Op } = require("sequelize");
 
 exports.getAllTransaksi = async (req, res) => {
   try {
     const transaksi = await Transaksi.findAll();
     res.json(transaksi);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getTotalHargaSemuaTransaksi = async (req, res) => {
+  try {
+    const transaksi = await Transaksi.findAll();
+
+    let totalHargaSemuaTransaksi = 0;
+    transaksi.forEach((item) => {
+      totalHargaSemuaTransaksi += item.total_harga;
+    });
+
+    res.json({ total_harga_semua_transaksi: totalHargaSemuaTransaksi });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
