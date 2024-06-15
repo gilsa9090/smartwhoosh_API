@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/userModels");
 const { generateToken } = require("../config/authConfig");
 const fs = require("fs");
-
 const path = require("path");
 
 exports.getAllUsers = async (req, res) => {
@@ -18,7 +17,7 @@ exports.getAllUsers = async (req, res) => {
       nama: user.nama,
       alamat: user.alamat,
       affiliate: user.affiliate,
-      imageUrl: `http://192.168.1.4:8000/${user.image}`,
+      imageUrl: `http://31.220.111.233:8000/${user.image}`,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     }));
@@ -37,7 +36,7 @@ exports.getUserById = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    const imgUrl = `http://192.168.1.4:8000/${userById.image}`;
+    const imgUrl = `http://31.220.111.233:8000/${userById.image}`;
 
     res.json({ user: userById, imgUrl });
   } catch (error) {
@@ -123,7 +122,7 @@ exports.login = async (req, res) => {
 
     // Generate token
     const token = generateToken(UserData);
-    const imgUrl = `http://192.168.1.4:8000/${image}`;
+    const imgUrl = `http://31.220.111.233:8000/${image}`;
 
     // Kirim respons sukses
     res.status(200).json({
@@ -211,5 +210,161 @@ exports.logout = async (req, res) => {
   } catch (error) {
     console.error("Error during logout:", error);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Hapus gambar pengguna dari sistem file jika ada
+    if (user.image) {
+      const imagePath = path.join(__dirname, "../uploads/", user.image);
+      fs.unlinkSync(imagePath);
+    }
+
+    // Hapus pengguna dari database
+    await user.destroy();
+
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email, role_id, nama, alamat, affiliate } = req.body;
+    let image = "";
+
+    if (req.file) {
+      image = req.file.filename;
+    }
+
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Jika ada gambar baru diunggah dan ada gambar lama, hapus gambar lama
+    if (image && user.image) {
+      const imagePath = path.join(__dirname, "../uploads/", user.image);
+      fs.unlinkSync(imagePath);
+    }
+
+    // Jika tidak ada gambar baru diunggah, gunakan gambar yang sudah ada
+    if (!image && user.image) {
+      image = user.image;
+    }
+
+    // Update fields pengguna
+    user.email = email || user.email;
+    user.role_id = role_id || user.role_id;
+    user.nama = nama || user.nama;
+    user.alamat = alamat || user.alamat;
+    user.affiliate = affiliate || user.affiliate;
+    if (image) {
+      user.image = image;
+    }
+
+    // Simpan pengguna yang sudah diperbarui
+    await user.save();
+
+    // Mengembalikan data pengguna yang sudah diperbarui
+    const updatedUser = {
+      userId: user.id,
+      email: user.email,
+      role_id: user.role_id,
+      name: user.nama,
+      address: user.alamat,
+      affiliate: user.affiliate,
+      image: user.image,
+    };
+
+    res
+      .status(200)
+      .json({ message: "User updated successfully", user: updatedUser });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+exports.updateUserwithpass = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email, role_id, nama, alamat, affiliate, password } = req.body;
+    let image = "";
+
+    if (req.file) {
+      image = req.file.filename;
+    }
+
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Jika ada gambar baru diunggah dan ada gambar lama, hapus gambar lama
+    if (image && user.image) {
+      const imagePath = path.join(__dirname, "../uploads/", user.image);
+      fs.unlinkSync(imagePath);
+    }
+
+    // Jika tidak ada gambar baru diunggah, gunakan gambar yang sudah ada
+    if (!image && user.image) {
+      image = user.image;
+    }
+
+    // Update fields pengguna
+    user.email = email || user.email;
+    user.role_id = role_id || user.role_id;
+    user.nama = nama || user.nama;
+    user.alamat = alamat || user.alamat;
+    user.affiliate = affiliate || user.affiliate;
+    if (image) {
+      user.image = image;
+    }
+
+    // Jika ada permintaan untuk memperbarui password
+    if (password) {
+      // Hash password baru
+      const hashedPassword = await bcrypt.hash(password, 10); // Gunakan salt rounds sebesar 10
+
+      // Update password
+      user.password = hashedPassword;
+    }
+
+    // Simpan pengguna yang sudah diperbarui
+    await user.save();
+
+    // Mengembalikan data pengguna yang sudah diperbarui
+    const updatedUser = {
+      userId: user.id,
+      email: user.email,
+      role_id: user.role_id,
+      name: user.nama,
+      address: user.alamat,
+      affiliate: user.affiliate,
+      image: user.image,
+    };
+
+    res
+      .status(200)
+      .json({ message: "User updated successfully", user: updatedUser });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

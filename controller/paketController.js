@@ -9,7 +9,7 @@ exports.getAllPaket = async (req, res) => {
       id: pk.id,
       nama_paket: pk.nama_paket,
       harga_paket: pk.harga_paket,
-      image: `http://192.168.1.4:8000/${pk.image}`,
+      image: `http://31.220.111.233:8000/${pk.image}`,
       deskripsi: pk.deskripsi,
       kd_paket: pk.kd_paket,
       createdAt: pk.createdAt,
@@ -66,7 +66,7 @@ exports.getPaketById = async (req, res) => {
       return res.status(404).json({ error: "Paket Tidak ditemukan" });
     }
 
-    const imageUrl = `http://192.168.1.4:3000/${paketId.image}`;
+    const imageUrl = `http://31.220.111.233:8000/${paketId.image}`;
 
     res.json({ paketId, imageUrl });
   } catch (error) {
