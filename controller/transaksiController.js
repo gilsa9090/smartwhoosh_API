@@ -3,6 +3,68 @@ const Paket = require("../models/paketModels");
 const User = require("../models/userModels");
 const { Op } = require("sequelize");
 
+exports.createTransaksi2 = async (req, res) => {
+  try {
+    const lastTransaksi = await Transaksi.findOne({
+      order: [["createdAt", "DESC"]],
+    });
+
+    let kd_transaksi;
+    if (lastTransaksi) {
+      const lastKode = lastTransaksi.kd_transaksi;
+      const lastNumber = parseInt(lastKode.slice(3)); // Ambil angka setelah "LOU"
+      const nextNumber = lastNumber + 1;
+      kd_transaksi = `LOU${nextNumber.toString().padStart(3, "0")}`;
+    } else {
+      // Jika tidak ada data transaksi, mulai dengan LOU001
+      kd_transaksi = "LOU001";
+    }
+
+    // Buat transaksi baru dengan kode yang telah di-generate
+    const {
+      nama_pelanggan,
+      berat,
+      tanggal_masuk,
+      tanggal_keluar,
+      total_harga,
+      status,
+      kasir_id,
+      nama_paket,
+    } = req.body;
+
+    const newTransaksi = await Transaksi.create({
+      nama_pelanggan,
+      berat,
+      tanggal_masuk,
+      tanggal_keluar,
+      total_harga,
+      status,
+      kasir_id,
+      nama_paket,
+      kd_transaksi: kd_transaksi, // Assign the generated transaction code
+    });
+
+    res.status(201).json({
+      message: "Transaksi berhasil dibuat",
+      data: {
+        kd_transaksi: newTransaksi.kd_transaksi,
+        nama_pelanggan: newTransaksi.nama_pelanggan,
+        berat: newTransaksi.berat,
+        tanggal_masuk: newTransaksi.tanggal_masuk,
+        tanggal_keluar: newTransaksi.tanggal_keluar,
+        total_harga: newTransaksi.total_harga,
+        status: newTransaksi.status,
+        kasir_id: newTransaksi.kasir_id,
+        nama_paket: newTransaksi.nama_paket,
+      },
+    });
+  } catch (error) {
+    console.error("Error creating transaction:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
 exports.getAllTransaksi = async (req, res) => {
   try {
     const transaksi = await Transaksi.findAll();
